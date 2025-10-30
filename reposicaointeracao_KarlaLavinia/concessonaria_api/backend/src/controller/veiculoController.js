@@ -16,7 +16,7 @@ export const criarVeiculo = async (req, res, next) => {
               throw err;
         }
         if(!ano){
-           const err = new Error("O campo Modelo é obrigatório.");
+           const err = new Error("O campo ano é obrigatório.");
             err.statusCode = 400;
             throw err;
         }
@@ -46,8 +46,8 @@ export const listarVeiculos = async (req, res, next) => {
     try{
         const veiculos = await veiculoModels.findAll({
             attributes: ['modelo', 'placa', 'ano','cor', 'preco']
-        })
-        res.status(200).json({veiculos})
+        });
+        res.status(200).json({veiculos});
     } catch (error){
        next (error);
     }
@@ -107,22 +107,28 @@ export const atualizarVeiculo = async (req, res, next) => {
 }
 
 export const deletarVeiculo = async (request, response, next) => {
-    const { id } = request.params
+    const { id } = request.params;
     
     try {
-        if(!veiculo){
-            const err = new Error("O modelo é obrigatório")
-            err.statusCode = 400
-            throw err
+        const veiculo = await veiculoModels.findByPk(id);
+
+        if (!veiculo) {
+            const err = new Error("Veículo não encontrado");
+            err.statusCode = 404;
+            throw err;
         }
-      
-        const veiculoDeletado = await veiculoModels.destroy({where: { id }});
-        if(!veiculoDeletado === 0){
-            const err = new Error("Veículo não deletado")
-            err.statusCode = 404
-            throw err
+
+        const veiculoDeletado = await veiculoModels.destroy({ where: { id } });
+
+        if (veiculoDeletado === 0) {
+            const err = new Error("Veículo não deletado");
+            err.statusCode = 400;
+            throw err;
         }
+
+        res.status(200).json({ mensagem: "Veículo deletado com sucesso!" });
+
     } catch (error) {
-        next(error)
+        next(error);
     }
-}
+};
